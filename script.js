@@ -1,3 +1,10 @@
+let correct = [
+  [1, 2, 3, 4],
+  [5, 6, 7, 8],
+  [9, 10, 11, 12],
+  [13, 14, 15, 0],
+];
+
 class Cell {
   constructor(i, j) {
     this.i = i;
@@ -226,6 +233,10 @@ class Game {
           this.state.matrix[i][j] === 0
             ? ` `
             : this.state.matrix[i][j].toString();
+        if (this.state.matrix[i][j] == correct[i][j]) {
+          matCell.style.backgroundColor = "#d4ee9f";
+        }
+
         matCell.addEventListener("click", this.handleClickCell(new Cell(i, j)));
       }
     }
