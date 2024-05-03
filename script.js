@@ -154,6 +154,7 @@ convertTime(timer);
 const updateTimer = () => {
   timer++;
   document.getElementById("time").textContent = `Time:${convertTime(timer)}`;
+  localStorage.setItem("timer", JSON.stringify(timer));
 };
 
 let flag = false;
@@ -186,6 +187,10 @@ class Game {
 
   handleClickCell(cell) {
     return () => {
+      if (playButton.textContent == "Play") {
+        // alert("Click on Play to resume the game.");
+        return;
+      }
       const adjacentCells = cell.getAllAdjacentCells();
       const emptyCell = adjacentCells.find(
         (adjacentCell) =>
@@ -208,6 +213,7 @@ class Game {
           });
         }
       }
+      localStorage.setItem("Game", JSON.stringify(game));
     };
   }
 
@@ -232,6 +238,7 @@ class Game {
     }
 
     // Render move
+    // console.log(this.state.move);
     document.getElementById("moves").textContent = `Moves:${this.state.move}`;
 
     if (this.state.status === "won") {
@@ -255,10 +262,7 @@ const resume = () => {
   playButton.addEventListener("click", pause);
 };
 
-let game = new Game(State.ready());
-// game.init();
-
-console.log(game.state.status);
+// console.log(game.state.status);
 let playButton = document.getElementById("play");
 
 let playBtnEventId = () => {
@@ -270,17 +274,42 @@ playButton.addEventListener("click", playBtnEventId);
 function resetGame() {
   timer = 0;
   clearInterval(timerID);
+  localStorage.clear();
   document.getElementById("time").textContent = `Time:${convertTime(timer)}`;
   game = new Game(State.ready());
-  game.init();
-  
   playButton.textContent = "Play";
-  
   game.render();
   playButton.removeEventListener("click", playBtnEventId);
+  playButton.removeEventListener("click", pause);
+  playButton.removeEventListener("click", resume);
   playButton.addEventListener("click", playBtnEventId);
 }
 
 let resetButton = document.getElementById("reset");
 resetButton.addEventListener("click", resetGame);
 
+let game;
+//get from localStorage
+let localGame = localStorage.getItem("Game");
+let localTimer = localStorage.getItem("timer");
+
+//check localStorage before initalising with ready state
+if (localGame != null) {
+  let ans = confirm("Do you want to resume the last saved game?");
+  if (ans) {
+    let temp = JSON.parse(localGame);
+    timer = JSON.parse(localTimer);
+    console.log(localTimer);
+
+    game = new Game(
+      new State(temp.state.move, temp.state.matrix, temp.state.status)
+    );
+    timerID = setInterval(updateTimer, 1000);
+    game.render();
+  } // if dont want to init with localStorage
+  else {
+    //clear local storage from reset
+    game = new Game(State.ready());
+  }
+} // if not in localStorage yet
+else game = new Game(State.ready());
