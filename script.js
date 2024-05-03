@@ -2,7 +2,7 @@ let correct = [
   [1, 2, 3, 4],
   [5, 6, 7, 8],
   [9, 10, 11, 12],
-  [13, 14, 15, 0],
+  [13, 14, 15, 99],
 ];
 
 class Cell {
@@ -173,7 +173,7 @@ class Game {
   }
 
   init() {
-    let ans = new Game(State.ready());
+    // let ans = new Game(State.ready());
     for (let i = 0; i < 4; i++) {
       for (let j = 0; j < 4; j++) {
         const matCell = document.getElementById(`row${i + 1}${j + 1}`);
@@ -184,7 +184,7 @@ class Game {
         matCell.addEventListener("click", this.handleClickCell(new Cell(i, j)));
       }
     }
-    return ans;
+    // return ans;
   }
 
   setState(newState) {
@@ -235,7 +235,7 @@ class Game {
             : this.state.matrix[i][j].toString();
         if (this.state.matrix[i][j] == correct[i][j]) {
           matCell.style.backgroundColor = "#d4ee9f";
-        }
+        } else matCell.style.backgroundColor = "#cfcfcf";
 
         matCell.addEventListener("click", this.handleClickCell(new Cell(i, j)));
       }
