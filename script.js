@@ -257,14 +257,12 @@ class Game {
     }
   }
 }
-const overlay = document.getElementById("game-matrix-overlay");
+let overlay = document.getElementById("game-matrix-overlay");
 
-const overlayHidden = () => {
+const overlayHiddenResume = () => {
   overlay.style = "display: none;";
   resume();
 };
-
-overlay.addEventListener("click", overlayHidden);
 
 const pause = () => {
   clearInterval(timerID);
@@ -289,22 +287,28 @@ let playButton = document.getElementById("play");
 let playBtnEventId = () => {
   timerID = setInterval(updateTimer, 1000);
   game.setState(State.start());
+  overlay.style = "display: none;";
 };
 playButton.addEventListener("click", playBtnEventId);
+overlay.addEventListener("click", playBtnEventId);
 
 function resetGame() {
-  timer = 0;
-  clearInterval(timerID);
-  localStorage.clear();
-  document.getElementById("time").textContent = `Time:${convertTime(timer)}`;
-  game = new Game(State.ready());
-  playButton.textContent = "Play";
-  game.render();
-  playButton.removeEventListener("click", playBtnEventId);
-  playButton.removeEventListener("click", pause);
-  playButton.removeEventListener("click", resume);
-  playButton.addEventListener("click", playBtnEventId);
-  overlay.style = "display: none;";
+  if (timer != 0) {
+    timer = 0;
+    clearInterval(timerID);
+    localStorage.clear();
+    document.getElementById("time").textContent = `Time:${convertTime(timer)}`;
+    game = new Game(State.ready());
+    playButton.textContent = "Play";
+    game.render();
+    playButton.removeEventListener("click", playBtnEventId);
+    playButton.removeEventListener("click", pause);
+    playButton.removeEventListener("click", resume);
+    playButton.addEventListener("click", playBtnEventId);
+    overlay.style = "display: flex;";
+    overlay.removeEventListener("click", overlayHiddenResume);
+    overlay.addEventListener("click", playBtnEventId);
+  }
 }
 
 let resetButton = document.getElementById("reset");
@@ -323,11 +327,13 @@ if (localGame != null) {
     timer = JSON.parse(localTimer);
     console.log(localTimer);
 
-    game = new Game(
-      new State(temp.state.move, temp.state.matrix, temp.state.status)
-    );
-    timerID = setInterval(updateTimer, 1000);
+    game = new Game(new State(temp.state.move, temp.state.matrix, "ready"));
+    playButton.textContent = "Play";
     game.render();
+    playButton.removeEventListener("click", pause);
+    playButton.addEventListener("click", resume);
+    overlay.removeEventListener("click", playBtnEventId);
+    overlay.addEventListener("click", overlayHiddenResume);
   } // if dont want to init with localStorage
   else {
     //clear local storage from reset
