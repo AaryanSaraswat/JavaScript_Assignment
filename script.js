@@ -257,14 +257,23 @@ class Game {
     }
   }
 }
+const overlay = document.getElementById("game-matrix-overlay");
+
+const overlayHidden = () => {
+  overlay.style = "display: none;";
+  resume();
+};
+
+overlay.addEventListener("click", overlayHidden);
 
 const pause = () => {
   clearInterval(timerID);
   playButton.textContent = "Play";
   playButton.removeEventListener("click", pause);
   playButton.addEventListener("click", resume);
-  flag = false;
+  overlay.style = "display: flex;";
 };
+
 const resume = () => {
   timerID = setInterval(updateTimer, 1000);
   playButton.textContent = "Pause";

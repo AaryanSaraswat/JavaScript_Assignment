@@ -82,6 +82,23 @@ body {
   align-items: center;
   justify-content: center;
 }
+#game-matrix-overlay {
+  height: 280px;
+  max-width: 280px;
+  position: absolute;
+  background-color: #d4ee9f;
+  opacity: 80%;
+  color: #003333;
+  font-size: 400%;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border: 2px solid black;
+  border-radius: 15px;
+}
+
 .game-matrix div {
   display: flex;
   flex-direction: row;
@@ -101,9 +118,13 @@ body {
   cursor: pointer;
   border-radius: 10px;
 }
+button:focus {
+  box-shadow: 0 0 1px 4px #e8d450;
+}
 .game-matrix button:focus {
-  background-color: #67e3e3;
+  /* background-color: #67e3e3; */
   color: #000000;
+  box-shadow: 0 0 1px 4px #e8d450;
 }
 
 .game-footer {
@@ -121,5 +142,10 @@ body {
   }
   .game-controller {
     flex-direction: row;
+  }
+  #game-matrix-overlay {
+    height: 350px;
+    max-width: 350px;
+    font-size: 500%;
   }
 }
