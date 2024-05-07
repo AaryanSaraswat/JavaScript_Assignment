@@ -253,7 +253,10 @@ class Game {
     document.getElementById("moves").textContent = `Moves:${this.state.move}`;
 
     if (this.state.status === "won") {
-      alert("You Won!");
+      {
+        alert("You Won!");
+        resetGame();
+      }
     }
   }
 }
