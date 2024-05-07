@@ -96,7 +96,7 @@ function getRandomMatrix() {
   ];
   // return matrix;
   let emptyCell = new Cell(3, 3);
-  for (let i = 0; i < 100; i++) {
+  for (let i = 0; i < 1000; i++) {
     const cellToBeSwappedWith = emptyCell.getRandomAdjacentCells();
     swapCells(matrix, emptyCell, cellToBeSwappedWith);
     emptyCell = cellToBeSwappedWith;
@@ -280,6 +280,7 @@ const resume = () => {
   playButton.removeEventListener("click", resume);
   playButton.addEventListener("click", pause);
   playButton.addEventListener("click", pause);
+  overlay.style = "display: none;";
 };
 
 // console.log(game.state.status);
@@ -303,6 +304,7 @@ function resetGame() {
   playButton.removeEventListener("click", pause);
   playButton.removeEventListener("click", resume);
   playButton.addEventListener("click", playBtnEventId);
+  overlay.style = "display: none;";
 }
 
 let resetButton = document.getElementById("reset");
