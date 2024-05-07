@@ -270,6 +270,8 @@ const pause = () => {
   playButton.removeEventListener("click", pause);
   playButton.addEventListener("click", resume);
   overlay.style = "display: flex;";
+  disableGrid();
+  overlay.textContent = "Click to Resume";
 };
 
 const resume = () => {
@@ -279,6 +281,17 @@ const resume = () => {
   playButton.addEventListener("click", pause);
   playButton.addEventListener("click", pause);
   overlay.style = "display: none;";
+  disableGrid();
+};
+
+const disableGrid = () => {
+  for (let i = 0; i < 4; i++) {
+    for (let j = 0; j < 4; j++) {
+      const matCell = document.getElementById(`row${i + 1}${j + 1}`);
+      if (matCell.hasAttribute("disabled")) matCell.removeAttribute("disabled");
+      else matCell.setAttribute("disabled", "true");
+    }
+  }
 };
 
 // console.log(game.state.status);
@@ -288,6 +301,7 @@ let playBtnEventId = () => {
   timerID = setInterval(updateTimer, 1000);
   game.setState(State.start());
   overlay.style = "display: none;";
+  disableGrid();
 };
 playButton.addEventListener("click", playBtnEventId);
 overlay.addEventListener("click", playBtnEventId);
@@ -308,7 +322,14 @@ function resetGame() {
     overlay.style = "display: flex;";
     overlay.removeEventListener("click", overlayHiddenResume);
     overlay.addEventListener("click", playBtnEventId);
+    for (let i = 0; i < 4; i++) {
+      for (let j = 0; j < 4; j++) {
+        const matCell = document.getElementById(`row${i + 1}${j + 1}`);
+        matCell.setAttribute("disabled", "true");
+      }
+    }
   }
+  overlay.textContent = "Click to Play";
 }
 
 let resetButton = document.getElementById("reset");
