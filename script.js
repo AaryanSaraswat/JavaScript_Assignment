@@ -169,7 +169,6 @@ let flag = false;
 class Game {
   constructor(state) {
     this.state = state;
-    this.handleClickCell = this.handleClickCell.bind(this);
   }
 
   init() {
@@ -181,7 +180,7 @@ class Game {
           this.state.matrix[i][j] === 0
             ? ` `
             : this.state.matrix[i][j].toString();
-        matCell.addEventListener("click", this.handleClickCell(new Cell(i, j)));
+        // matCell.addEventListener("click", this.handleClickCell(new Cell(i, j)));
       }
     }
     // return ans;
@@ -190,38 +189,6 @@ class Game {
   setState(newState) {
     this.state = { ...this.state, ...newState };
     this.render();
-  }
-
-  handleClickCell(cell) {
-    return () => {
-      if (playButton.textContent == "Play") {
-        // alert("Click on Play to resume the game.");
-        return;
-      }
-      const adjacentCells = cell.getAllAdjacentCells();
-      const emptyCell = adjacentCells.find(
-        (adjacentCell) =>
-          this.state.matrix[adjacentCell.i][adjacentCell.j] === 0
-      );
-      if (emptyCell) {
-        const newMatrix = [...this.state.matrix];
-        swapCells(newMatrix, cell, emptyCell);
-        if (isSolved(newMatrix)) {
-          clearInterval(this.tickId);
-          this.setState({
-            status: "won",
-            matrix: newMatrix,
-            move: this.state.move + 1,
-          });
-        } else {
-          this.setState({
-            matrix: newMatrix,
-            move: this.state.move + 1,
-          });
-        }
-      }
-      localStorage.setItem("Game", JSON.stringify(game));
-    };
   }
 
   render() {
@@ -237,7 +204,7 @@ class Game {
           matCell.style.backgroundColor = "#d4ee9f";
         } else matCell.style.backgroundColor = "#cfcfcf";
 
-        matCell.addEventListener("click", this.handleClickCell(new Cell(i, j)));
+        // matCell.addEventListener("click", this.handleClickCell(new Cell(i, j)));
       }
     }
 
@@ -260,6 +227,49 @@ class Game {
     }
   }
 }
+
+let dx = [
+  [1, 0],
+  [-1, 0],
+  [0, 1],
+  [0, -1],
+];
+
+const handleClick = (e) => {
+  let id = e.id;
+  let i = parseInt(id[3]) - 1;
+  let j = parseInt(id[4]) - 1;
+  //   console.log("Clicked cell:", id, "at position:", i, j);
+
+  for (let idx = 0; idx < 4; idx++) {
+    let ni = i + dx[idx][0];
+    let nj = j + dx[idx][1];
+
+    // console.log("Available cells", ni, nj);
+    if (ni >= 0 && ni < 4 && nj >= 0 && nj < 4) {
+      //   console.log("Checking adjacent cell at position:", ni, nj);
+      if (game.state.matrix[ni][nj] === 0) {
+        // console.log("Found adjacent empty cell at:", ni, nj);
+        // Swap the values directly in the matrix
+        let temp = game.state.matrix[i][j];
+        game.state.matrix[i][j] = game.state.matrix[ni][nj];
+        game.state.matrix[ni][nj] = temp;
+        if (isSolved(game.state.matrix)) {
+          clearInterval(tickId);
+          game.state.status = "won";
+          game.state.move++;
+        } else {
+          game.state.move++;
+        }
+        localStorage.setItem("Game", JSON.stringify(game));
+        game.render();
+        return;
+      }
+    }
+  }
+  //   console.log("No adjacent empty cell found.");
+};
+
 let overlay = document.getElementById("game-matrix-overlay");
 
 const overlayHiddenResume = () => {

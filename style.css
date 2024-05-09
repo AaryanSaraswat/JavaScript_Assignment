@@ -60,7 +60,7 @@ body {
   margin: 5px;
 }
 
-.game-controller button:focus {
+.game-controller button:focus-visible {
   color: #d4ee9f;
   background-color: #003333;
 }
@@ -69,12 +69,6 @@ body {
   background-color: #003333;
 }
 
-/* .game-matrix { */
-/* display: grid; */
-/* grid-template-columns: 80px 80px 80px 80px; */
-/* grid-template-rows: 80px 80px 80px 80px; */
-/* border: 1px solid #550000; */
-/* } */
 .game-matrix {
   display: flex;
   flex-direction: column;
@@ -117,15 +111,14 @@ body {
   border: 2px solid black;
   border-radius: 15px;
 }
-button:focus {
+button:focus-visible {
   box-shadow: 0 0 1px 4px #e8d450;
 }
-div:focus {
+div:focus-visible {
   box-shadow: 0 0 1px 4px #e8d450;
 }
-.game-matrix button:focus {
-  /* background-color: #67e3e3; */
-  color: #000000;
+.game-matrix button:focus-visible {
+  /* color: #000000; */
   box-shadow: 0 0 1px 4px #e8d450;
 }
 
