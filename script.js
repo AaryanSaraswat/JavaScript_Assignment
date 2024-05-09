@@ -162,6 +162,7 @@ const updateTimer = () => {
   timer++;
   document.getElementById("time").textContent = `Time:${convertTime(timer)}`;
   localStorage.setItem("timer", JSON.stringify(timer));
+  localStorage.setItem("Game", JSON.stringify(game));
 };
 
 let flag = false;
@@ -219,6 +220,9 @@ class Game {
     // console.log(this.state.move);
     document.getElementById("moves").textContent = `Moves:${this.state.move}`;
 
+    //Render time
+    document.getElementById("time").textContent = `Time:${convertTime(timer)}`;
+
     if (this.state.status === "won") {
       {
         alert("You Won!");
@@ -262,6 +266,7 @@ const handleClick = (e) => {
           game.state.move++;
         }
         localStorage.setItem("Game", JSON.stringify(game));
+        localStorage.setItem("timer", JSON.stringify(timer));
         game.render();
         return;
       }
@@ -354,7 +359,7 @@ let localGame = localStorage.getItem("Game");
 let localTimer = localStorage.getItem("timer");
 
 //check localStorage before initalising with ready state
-if (localGame != null) {
+if (localGame != null || localTimer != null) {
   let ans = confirm("Do you want to resume the last saved game?");
   if (ans) {
     let temp = JSON.parse(localGame);
