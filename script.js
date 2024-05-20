@@ -1,56 +1,24 @@
+////// Global Variables ///////
+let timer = 0;
+let moves = 0;
+let timerID;
+let tooglePlayPause = false;
+let resetButton = document.getElementById("reset");
+let playButton = document.getElementById("play");
+let overlay = document.getElementById("game-matrix-overlay");
+let game;
+//get from localStorage
+let localGame = localStorage.getItem("Game");
+let localTimer = localStorage.getItem("timer");
+
 let correct = [
   [1, 2, 3, 4],
   [5, 6, 7, 8],
   [9, 10, 11, 12],
-  [13, 14, 15, 99],
+  [13, 14, 15, 0],
 ];
 
-class Cell {
-  constructor(i, j) {
-    this.i = i;
-    this.j = j;
-  }
-
-  checkIndexing(x, y) {
-    return x >= 0 && x < 4 && y >= 0 && y < 4;
-  }
-
-  getUp() {
-    if (this.checkIndexing(this.i, this.j - 1))
-      return new Cell(this.i, this.j - 1);
-    return null;
-  }
-  getDown() {
-    if (this.checkIndexing(this.i, this.j + 1))
-      return new Cell(this.i, this.j + 1);
-    return null;
-  }
-  getLeft() {
-    if (this.checkIndexing(this.i - 1, this.j))
-      return new Cell(this.i - 1, this.j);
-    return null;
-  }
-  getRight() {
-    if (this.checkIndexing(this.i + 1, this.j))
-      return new Cell(this.i + 1, this.j);
-    return null;
-  }
-
-  getAllAdjacentCells() {
-    let arr = [this.getUp(), this.getDown(), this.getLeft(), this.getRight()];
-
-    arr = arr.filter((cell) => cell !== null); // Fixed filter function
-
-    return arr; // Added return statement
-  }
-
-  getRandomAdjacentCells() {
-    const adj = this.getAllAdjacentCells();
-    let idx = Math.floor(Math.random() * adj.length);
-    const c = adj[idx];
-    return c;
-  }
-}
+////// Global Variables ///////
 
 class State {
   constructor(move, matrix, status) {
@@ -78,32 +46,37 @@ class State {
   }
 }
 
-//function to swap 2 functions in a cell
-const swapCells = (grid, cell1, cell2) => {
-  let temp = grid[cell1.i][cell1.j];
-  grid[cell1.i][cell1.j] = grid[cell2.i][cell2.j];
-  grid[cell2.i][cell2.j] = temp;
-};
+function getMatrix() {
+  // Initialize array with numbers 0 to 15
+  let numbers = [];
+  for (let i = 0; i <= 15; i++) {
+    numbers.push(i);
+  }
+
+  // Shuffle the array
+  for (let i = numbers.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [numbers[i], numbers[j]] = [numbers[j], numbers[i]];
+  }
+
+  // Convert the shuffled array to a 4x4 matrix
+  let matrix = [];
+  for (let i = 0; i < 4; i++) {
+    let row = [];
+    for (let j = 0; j < 4; j++) {
+      row.push(numbers[i * 4 + j]);
+    }
+    matrix.push(row);
+  }
+
+  return matrix;
+}
 
 //make a matrix and shuffle it
 function getRandomMatrix() {
-  // Fixed function name
-  let matrix = [
-    [1, 2, 3, 4],
-    [5, 6, 7, 8],
-    [9, 10, 11, 12],
-    [13, 14, 15, 0],
-  ];
-  // return matrix;
-  let emptyCell = new Cell(3, 3);
-  for (let i = 0; i < 1000; i++) {
-    const cellToBeSwappedWith = emptyCell.getRandomAdjacentCells();
-    swapCells(matrix, emptyCell, cellToBeSwappedWith);
-    emptyCell = cellToBeSwappedWith;
-  }
-
-  if (isSolved(matrix) || !isSolvable(matrix)) return matrix; // Fixed function name
-  return getRandomMatrix();
+  let matrix = getMatrix();
+  if (isSolved(matrix) || !isSolvable(matrix)) return getRandomMatrix(); // Fixed function name
+  return matrix;
 }
 
 //function to check whether the matrix is completed?
@@ -153,19 +126,11 @@ const convertTime = () => {
   return `${h < 10 ? "0" + h : h}:${m < 10 ? "0" + m : m}`;
 };
 
-let timer = 0;
-let moves = 0;
-let timerID;
-
-convertTime(timer);
 const updateTimer = () => {
   timer++;
   document.getElementById("time").textContent = `Time:${convertTime(timer)}`;
   localStorage.setItem("timer", JSON.stringify(timer));
-  localStorage.setItem("Game", JSON.stringify(game));
 };
-
-let flag = false;
 
 class Game {
   constructor(state) {
@@ -204,20 +169,8 @@ class Game {
         if (this.state.matrix[i][j] == correct[i][j]) {
           matCell.style.backgroundColor = "#d4ee9f";
         } else matCell.style.backgroundColor = "#cfcfcf";
-
-        // matCell.addEventListener("click", this.handleClickCell(new Cell(i, j)));
       }
     }
-
-    // Render button
-    if (flag == false) {
-      if (this.state.status === "playing") playButton.textContent = "Pause";
-      playButton.removeEventListener("click", playBtnEventId);
-      playButton.addEventListener("click", pause);
-    }
-
-    // Render move
-    // console.log(this.state.move);
     document.getElementById("moves").textContent = `Moves:${this.state.move}`;
 
     //Render time
@@ -232,31 +185,28 @@ class Game {
   }
 }
 
-let dx = [
+// this is a 2D array to store change in position of a cell
+let positionChange = [
   [1, 0],
   [-1, 0],
   [0, 1],
   [0, -1],
 ];
 
-const handleClick = (e) => {
-  let id = e.id;
-  let i = parseInt(id[3]) - 1;
-  let j = parseInt(id[4]) - 1;
-  //   console.log("Clicked cell:", id, "at position:", i, j);
+//handleclick function to handle click event in matrix
+const handleClick = (element) => {
+  let id = element.id;
+  let ithIndex = parseInt(id[3]) - 1;
+  let jthInddex = parseInt(id[4]) - 1;
 
   for (let idx = 0; idx < 4; idx++) {
-    let ni = i + dx[idx][0];
-    let nj = j + dx[idx][1];
+    let ni = ithIndex + positionChange[idx][0];
+    let nj = jthInddex + positionChange[idx][1];
 
-    // console.log("Available cells", ni, nj);
     if (ni >= 0 && ni < 4 && nj >= 0 && nj < 4) {
-      //   console.log("Checking adjacent cell at position:", ni, nj);
       if (game.state.matrix[ni][nj] === 0) {
-        // console.log("Found adjacent empty cell at:", ni, nj);
-        // Swap the values directly in the matrix
-        let temp = game.state.matrix[i][j];
-        game.state.matrix[i][j] = game.state.matrix[ni][nj];
+        let temp = game.state.matrix[ithIndex][jthInddex];
+        game.state.matrix[ithIndex][jthInddex] = game.state.matrix[ni][nj];
         game.state.matrix[ni][nj] = temp;
         if (isSolved(game.state.matrix)) {
           clearInterval(tickId);
@@ -272,34 +222,27 @@ const handleClick = (e) => {
       }
     }
   }
-  //   console.log("No adjacent empty cell found.");
 };
 
-let overlay = document.getElementById("game-matrix-overlay");
-
-const overlayHiddenResume = () => {
-  overlay.style = "display: none;";
-  resume();
-};
-
-const pause = () => {
-  clearInterval(timerID);
-  playButton.textContent = "Play";
-  playButton.removeEventListener("click", pause);
-  playButton.addEventListener("click", resume);
-  overlay.style = "display: flex;";
-  disableGrid();
-  overlay.textContent = "Click to Resume";
-};
-
-const resume = () => {
-  timerID = setInterval(updateTimer, 1000);
-  playButton.textContent = "Pause";
-  playButton.removeEventListener("click", resume);
-  playButton.addEventListener("click", pause);
-  playButton.addEventListener("click", pause);
-  overlay.style = "display: none;";
-  disableGrid();
+const handleClickPlayBtn = () => {
+  if (!tooglePlayPause) {
+    timerID = setInterval(updateTimer, 1000);
+    playButton.textContent = "Pause";
+    overlay.style = "display: none;";
+    disableGrid();
+    tooglePlayPause = true;
+    if ((game.state.status = "ready")) {
+      game.setState(State.start());
+      localStorage.setItem("Game", JSON.stringify(game));
+    }
+  } else {
+    clearInterval(timerID);
+    playButton.textContent = "Play";
+    overlay.style = "display: flex;";
+    disableGrid();
+    overlay.textContent = "Click to Resume";
+    tooglePlayPause = false;
+  }
 };
 
 const disableGrid = () => {
@@ -312,18 +255,6 @@ const disableGrid = () => {
   }
 };
 
-// console.log(game.state.status);
-let playButton = document.getElementById("play");
-
-let playBtnEventId = () => {
-  timerID = setInterval(updateTimer, 1000);
-  game.setState(State.start());
-  overlay.style = "display: none;";
-  disableGrid();
-};
-playButton.addEventListener("click", playBtnEventId);
-overlay.addEventListener("click", playBtnEventId);
-
 function resetGame() {
   if (timer != 0) {
     timer = 0;
@@ -333,30 +264,12 @@ function resetGame() {
     game = new Game(State.ready());
     playButton.textContent = "Play";
     game.render();
-    playButton.removeEventListener("click", playBtnEventId);
-    playButton.removeEventListener("click", pause);
-    playButton.removeEventListener("click", resume);
-    playButton.addEventListener("click", playBtnEventId);
     overlay.style = "display: flex;";
-    overlay.removeEventListener("click", overlayHiddenResume);
-    overlay.addEventListener("click", playBtnEventId);
-    for (let i = 0; i < 4; i++) {
-      for (let j = 0; j < 4; j++) {
-        const matCell = document.getElementById(`row${i + 1}${j + 1}`);
-        matCell.setAttribute("disabled", "true");
-      }
-    }
+    disableGrid();
+    tooglePlayPause = false;
   }
   overlay.textContent = "Click to Play";
 }
-
-let resetButton = document.getElementById("reset");
-resetButton.addEventListener("click", resetGame);
-
-let game;
-//get from localStorage
-let localGame = localStorage.getItem("Game");
-let localTimer = localStorage.getItem("timer");
 
 //check localStorage before initalising with ready state
 if (localGame != null || localTimer != null) {
@@ -364,18 +277,13 @@ if (localGame != null || localTimer != null) {
   if (ans) {
     let temp = JSON.parse(localGame);
     timer = JSON.parse(localTimer);
-    console.log(localTimer);
-
     game = new Game(new State(temp.state.move, temp.state.matrix, "ready"));
     playButton.textContent = "Play";
     game.render();
-    playButton.removeEventListener("click", pause);
-    playButton.addEventListener("click", resume);
-    overlay.removeEventListener("click", playBtnEventId);
-    overlay.addEventListener("click", overlayHiddenResume);
-  } // if dont want to init with localStorage
-  else {
+  } else {
+    // if dont want to init with localStorage
     //clear local storage from reset
+    localStorage.clear();
     game = new Game(State.ready());
   }
 } // if not in localStorage yet

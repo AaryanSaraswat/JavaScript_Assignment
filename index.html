@@ -12,11 +12,13 @@
       <div class="game-controller">
         <span id="moves">Moves:0</span>
         <span id="time">Time:00:00</span>
-        <button id="play">Play</button>
-        <button id="reset">Reset</button>
+        <button id="play" onclick="handleClickPlayBtn()">Play</button>
+        <button id="reset" onclick="resetGame()">Reset</button>
       </div>
       <div class="game-matrix">
-        <button id="game-matrix-overlay">Click to Play</button>
+        <button id="game-matrix-overlay" onclick="handleClickPlayBtn()">
+          Click to Play
+        </button>
         <div id="row1">
           <button id="row11" onclick="handleClick(this)" disabled></button>
           <button id="row12" onclick="handleClick(this)" disabled></button>
